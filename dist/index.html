@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#08111f" />
+    <meta name="description" content="把每天最重要的三件事变成看得见的成长。离线可用的高中生任务与专注助手。" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>跃迁｜任务与专注</title>
+  </head>
+  <body>
+    <noscript>
+      <div class="noscript">请开启 JavaScript 以使用跃迁。</div>
+    </noscript>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" type="button" data-view-target="today" aria-label="回到今日">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 28 28"><path d="M6 19.5 13.8 7 22 19.5h-4.6l-3.6-5.8-3.4 5.8H6Z"/><path d="M11 20h6v3h-6z"/></svg>
+          </span>
+          <span>
+            <strong>跃迁</strong>
+            <small id="headerDate">今天</small>
+          </span>
+        </button>
+
+        <div class="topbar-actions">
+          <button id="installButton" class="install-button" type="button" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+            安装
+          </button>
+          <button class="level-pill" type="button" data-view-target="review" aria-label="查看成长记录">
+            <span id="levelLabel">LV.1</span>
+            <span class="level-track" aria-hidden="true"><i id="levelBar"></i></span>
+          </button>
+        </div>
+      </header>
+
+      <main id="mainContent">
+        <section class="view active" id="view-today" data-view="today" aria-labelledby="todayTitle">
+          <div class="command-card">
+            <div class="command-copy">
+              <p class="eyebrow" id="greeting">早上好</p>
+              <h1 id="todayTitle">今天，只推进最重要的事。</h1>
+              <p id="dailyPrompt">先完成一项短任务，让状态启动起来。</p>
+              <div class="metric-row" aria-label="今日状态">
+                <div class="metric">
+                  <span class="metric-icon flame" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M13.5 2.5c.8 3.7-2.8 5-1 8.1 1-1.1 1.6-2.2 1.6-3.6 3 2.1 5 5 4.4 8.3-.5 3.3-3.1 5.7-6.5 5.7s-6.2-2.3-6.6-5.8c-.3-2.7 1.1-5.1 3.4-6.8-.1 2 .6 3.4 1.7 4.2C9.8 8.4 12.8 6.8 13.5 2.5Z"/></svg>
+                  </span>
+                  <span><strong id="streakValue">0</strong><small>连续天数</small></span>
+                </div>
+                <div class="metric">
+                  <span class="metric-icon focus" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2V0m0 24v-2M2 12H0m24 0h-2"/></svg>
+                  </span>
+                  <span><strong id="focusValue">0</strong><small>专注分钟</small></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="orbit-wrap">
+              <svg class="orbit" viewBox="0 0 132 132" role="img" aria-labelledby="orbitTitle orbitDesc">
+                <title id="orbitTitle">今日任务进度</title>
+                <desc id="orbitDesc">已完成 0 项，共 3 项</desc>
+                <circle class="orbit-base" cx="66" cy="66" r="54" />
+                <circle id="orbitProgress" class="orbit-progress" cx="66" cy="66" r="54" />
+              </svg>
+              <div class="orbit-label">
+                <strong><span id="doneCount">0</span><span class="orbit-divider">/</span><span id="goalCount">3</span></strong>
+                <small>今日推进</small>
+              </div>
+            </div>
+          </div>
+
+          <section class="panel add-panel" aria-labelledby="quickAddTitle">
+            <div class="panel-heading compact">
+              <div>
+                <p class="section-kicker">QUICK CAPTURE</p>
+                <h2 id="quickAddTitle">添加下一步</h2>
+              </div>
+              <button id="suggestButton" class="text-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Zm6 10 .9 2.6 2.6.9-2.6.9L18 20l-.9-2.6-2.6-.9 2.6-.9L18 13Z"/></svg>
+                给我一个建议
+              </button>
+            </div>
+
+            <form id="taskForm" class="task-form">
+              <label class="task-input-wrap">
+                <span class="sr-only">任务名称</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <input id="taskTitle" name="title" type="text" maxlength="60" autocomplete="off" placeholder="例如：整理今天的数学错题" required />
+              </label>
+              <div class="task-options">
+                <label>
+                  <span class="sr-only">任务分类</span>
+                  <select id="taskSubject" name="subject" aria-label="任务分类">
+                    <option value="数学">数学</option>
+                    <option value="英语">英语</option>
+                    <option value="语文">语文</option>
+                    <option value="理科">理科</option>
+                    <option value="编程">编程</option>
+                    <option value="生活">生活</option>
+                    <option value="其他">其他</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="sr-only">预计用时</span>
+                  <select id="taskMinutes" name="minutes" aria-label="预计用时">
+                    <option value="10">10 分钟</option>
+                    <option value="20" selected>20 分钟</option>
+                    <option value="30">30 分钟</option>
+                    <option value="45">45 分钟</option>
+                    <option value="60">60 分钟</option>
+                  </select>
+                </label>
+                <button class="primary-button" type="submit">
+                  加入今日
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel task-panel" aria-labelledby="taskListTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="section-kicker">TODAY'S QUESTS</p>
+                <h2 id="taskListTitle">今日任务</h2>
+              </div>
+              <div class="filter-tabs" role="group" aria-label="筛选任务">
+                <button class="filter-tab active" type="button" data-filter="all" aria-pressed="true">全部</button>
+                <button class="filter-tab" type="button" data-filter="open" aria-pressed="false">待完成</button>
+                <button class="filter-tab" type="button" data-filter="done" aria-pressed="false">已完成</button>
+              </div>
+            </div>
+            <ul id="taskList" class="task-list" aria-live="polite"></ul>
+            <div id="emptyTasks" class="empty-state" hidden>
+              <span aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="M14 9h20a4 4 0 0 1 4 4v25H10V13a4 4 0 0 1 4-4Z"/><path d="M18 9V6h12v3M17 20l4 4 10-10M17 31h14"/></svg>
+              </span>
+              <strong>这里暂时空着</strong>
+              <p>添加一件真正值得推进的小事。</p>
+            </div>
+          </section>
+
+          <section class="micro-review" aria-labelledby="microReviewTitle">
+            <div>
+              <span class="micro-number" id="completionRate">0%</span>
+              <p><strong id="microReviewTitle">今日完成率</strong><br /><span id="reviewHint">完成第一项后，这里会显示你的节奏。</span></p>
+            </div>
+            <button type="button" data-view-target="review">查看本周 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+          </section>
+        </section>
+
+        <section class="view" id="view-focus" data-view="focus" aria-labelledby="focusTitle" hidden>
+          <div class="focus-layout">
+            <section class="focus-console">
+              <div class="focus-heading">
+                <div>
+                  <p class="section-kicker">DEEP WORK</p>
+                  <h1 id="focusTitle">把注意力留给这一件事。</h1>
+                </div>
+                <span class="status-chip" id="timerStatus"><i></i>准备就绪</span>
+              </div>
+
+              <label class="focus-task-select">
+                <span>本次专注任务</span>
+                <select id="focusTask" aria-label="选择专注任务"></select>
+              </label>
+
+              <div class="timer-ring" id="timerRing">
+                <div class="timer-readout" aria-live="polite">
+                  <span id="timerDisplay">25:00</span>
+                  <small id="timerCaption">一次完整的专注冲刺</small>
+                </div>
+              </div>
+
+              <div class="preset-row" role="group" aria-label="选择专注时长">
+                <button class="preset active" type="button" data-minutes="25" aria-pressed="true">25 分钟</button>
+                <button class="preset" type="button" data-minutes="45" aria-pressed="false">45 分钟</button>
+                <button class="preset" type="button" data-minutes="60" aria-pressed="false">60 分钟</button>
+                <button class="preset break-preset" type="button" data-minutes="10" data-kind="break" aria-pressed="false">休息 10 分钟</button>
+              </div>
+
+              <div class="timer-actions">
+                <button id="resetTimer" class="round-button" type="button" aria-label="重置计时器">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 15a7 7 0 1 0 .8-7.8L4 10"/></svg>
+                </button>
+                <button id="toggleTimer" class="timer-primary" type="button">
+                  <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6V6Z"/></svg>
+                  <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h3v12H8zM14 6h3v12h-3z"/></svg>
+                  <span>开始专注</span>
+                </button>
+                <button id="finishTimer" class="round-button" type="button" aria-label="提前完成本次专注">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+                </button>
+              </div>
+            </section>
+
+            <aside class="focus-aside">
+              <div class="aside-card">
+                <p class="section-kicker">TODAY</p>
+                <h2>今日专注</h2>
+                <strong><span id="todayFocusLarge">0</span><small> 分钟</small></strong>
+                <div class="goal-line"><i id="focusGoalBar"></i></div>
+                <p id="focusGoalHint">距离 60 分钟目标还有 60 分钟</p>
+              </div>
+              <div class="aside-card tip-card">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M8.5 15.5A7 7 0 1 1 16 15c-1 .8-1 1.6-1 3H9c0-2-.1-2.2-.5-2.5Z"/></svg>
+                <div>
+                  <strong>开始前，先清空桌面</strong>
+                  <p>只留下这一项任务需要的东西，减少切换成本。</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-review" data-view="review" aria-labelledby="reviewTitle" hidden>
+          <div class="review-header">
+            <div>
+              <p class="section-kicker">WEEKLY SIGNAL</p>
+              <h1 id="reviewTitle">看见自己的节奏。</h1>
+              <p>不追求每天完美，只确认自己持续向前。</p>
+            </div>
+            <div class="week-score">
+              <small>本周成长值</small>
+              <strong id="weekXp">0 XP</strong>
+            </div>
+          </div>
+
+          <div class="review-grid">
+            <section class="panel chart-panel" aria-labelledby="weekFocusTitle">
+              <div class="panel-heading compact">
+                <div>
+                  <p class="section-kicker">FOCUS MINUTES</p>
+                  <h2 id="weekFocusTitle">最近 7 天专注</h2>
+                </div>
+                <strong id="weekFocusTotal">0 分钟</strong>
+              </div>
+              <div id="weekChart" class="week-chart" aria-label="最近七天专注分钟柱状图"></div>
+            </section>
+
+            <section class="panel stats-panel" aria-labelledby="weekStatsTitle">
+              <div class="panel-heading compact">
+                <div>
+                  <p class="section-kicker">PROGRESS</p>
+                  <h2 id="weekStatsTitle">本周数据</h2>
+                </div>
+              </div>
+              <div class="big-stats">
+                <div><strong id="weekDone">0</strong><span>完成任务</span></div>
+                <div><strong id="weekSessions">0</strong><span>专注次数</span></div>
+                <div><strong id="bestDay">—</strong><span>最佳一天</span></div>
+              </div>
+            </section>
+
+            <section class="panel achievements-panel" aria-labelledby="achievementTitle">
+              <div class="panel-heading compact">
+                <div>
+                  <p class="section-kicker">MILESTONES</p>
+                  <h2 id="achievementTitle">里程碑</h2>
+                </div>
+              </div>
+              <div id="achievementList" class="achievement-list"></div>
+            </section>
+
+            <section class="panel insight-panel" aria-labelledby="insightTitle">
+              <span class="insight-mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32"><path d="m5 22 7-8 5 4 10-11"/><path d="M21 7h6v6"/></svg>
+              </span>
+              <p class="section-kicker">YOUR SIGNAL</p>
+              <h2 id="insightTitle">本周洞察</h2>
+              <p id="weeklyInsight">先完成几项任务，我会根据你的实际记录给出一条简短建议。</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-settings" data-view="settings" aria-labelledby="settingsTitle" hidden>
+          <div class="settings-header">
+            <p class="section-kicker">CONTROL ROOM</p>
+            <h1 id="settingsTitle">按你的节奏来。</h1>
+            <p>所有数据默认只保存在当前设备的浏览器中。</p>
+          </div>
+
+          <div class="settings-grid">
+            <section class="panel settings-card" aria-labelledby="profileTitle">
+              <div class="setting-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              </div>
+              <div class="setting-content">
+                <h2 id="profileTitle">个人目标</h2>
+                <label>称呼<input id="profileName" type="text" maxlength="16" placeholder="同学" /></label>
+                <label>每日重点任务
+                  <select id="dailyGoal">
+                    <option value="1">1 项</option>
+                    <option value="2">2 项</option>
+                    <option value="3">3 项</option>
+                    <option value="4">4 项</option>
+                    <option value="5">5 项</option>
+                  </select>
+                </label>
+                <label>每日专注目标
+                  <select id="focusGoal">
+                    <option value="25">25 分钟</option>
+                    <option value="45">45 分钟</option>
+                    <option value="60">60 分钟</option>
+                    <option value="90">90 分钟</option>
+                    <option value="120">120 分钟</option>
+                  </select>
+                </label>
+                <button id="saveSettings" class="secondary-button" type="button">保存设置</button>
+              </div>
+            </section>
+
+            <section class="panel settings-card" aria-labelledby="appearanceTitle">
+              <div class="setting-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-1-.8-1.5-1.7-1.1l-1.2.5a2 2 0 0 1-2.6-2.6l.5-1.2C16.4 4.5 15 3 12 3Z"/><circle cx="8" cy="9" r="1"/><circle cx="8" cy="14" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+              </div>
+              <div class="setting-content">
+                <h2 id="appearanceTitle">显示模式</h2>
+                <div class="segmented" role="group" aria-label="选择显示模式">
+                  <button type="button" data-theme-choice="system">跟随系统</button>
+                  <button type="button" data-theme-choice="dark">深色</button>
+                  <button type="button" data-theme-choice="light">浅色</button>
+                </div>
+                <p>显示模式会立即应用，并记住你的选择。</p>
+              </div>
+            </section>
+
+            <section class="panel settings-card" aria-labelledby="dataTitle">
+              <div class="setting-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>
+              </div>
+              <div class="setting-content">
+                <h2 id="dataTitle">数据备份</h2>
+                <p>导出一个 JSON 文件，可以在另一台设备中恢复。</p>
+                <div class="button-row">
+                  <button id="exportData" class="secondary-button" type="button">导出数据</button>
+                  <label class="secondary-button file-button">导入数据<input id="importData" type="file" accept="application/json,.json" /></label>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel settings-card danger-card" aria-labelledby="resetTitle">
+              <div class="setting-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 4v6h6M5.5 15a7 7 0 1 0 .8-7.8L4 10"/></svg>
+              </div>
+              <div class="setting-content">
+                <h2 id="resetTitle">重新开始</h2>
+                <p>清除当前设备上的所有任务和专注记录。导出备份后再操作更稳妥。</p>
+                <button id="resetData" class="danger-button" type="button">清除全部数据</button>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="主要导航">
+        <button class="nav-item active" type="button" data-view-target="today" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V21H4V10.5Z"/><path d="M9 21v-6h6v6"/></svg>
+          <span>今日</span>
+        </button>
+        <button class="nav-item" type="button" data-view-target="focus">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2V0m0 24v-2M2 12H0m24 0h-2"/></svg>
+          <span>专注</span>
+        </button>
+        <button class="nav-item" type="button" data-view-target="review">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m5 10V4m6 16v-7m5 7V7"/></svg>
+          <span>回顾</span>
+        </button>
+        <button class="nav-item" type="button" data-view-target="settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+          <span>设置</span>
+        </button>
+      </nav>
+    </div>
+
+    <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog id="confirmDialog" class="confirm-dialog">
+      <form method="dialog">
+        <span class="dialog-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 8v5m0 4h.01M10.3 3.8 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.8a2 2 0 0 0-3.4 0Z"/></svg>
+        </span>
+        <h2>清除全部数据？</h2>
+        <p>任务、专注记录和成长值都会从当前设备删除，此操作无法撤销。</p>
+        <div class="dialog-actions">
+          <button value="cancel" class="secondary-button">取消</button>
+          <button id="confirmReset" value="confirm" class="danger-button">确认清除</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="taskTemplate">
+      <li class="task-item">
+        <button class="task-check" type="button" aria-label="完成任务">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+        </button>
+        <div class="task-main">
+          <strong class="task-title"></strong>
+          <div class="task-meta"><span class="subject-badge"></span><span class="task-duration"></span><span class="task-xp"></span></div>
+        </div>
+        <button class="task-focus" type="button" aria-label="开始专注">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6V6Z"/></svg>
+        </button>
+        <button class="task-delete" type="button" aria-label="删除任务">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-1 14H7L6 7m4 4v6m4-6v6"/></svg>
+        </button>
+      </li>
+    </template>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
